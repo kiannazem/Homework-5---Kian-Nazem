@@ -1,0 +1,70 @@
+---
+title: "Decomposition of Inflation Dataset"
+output: html_document
+date: "2024-10-10"
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(readxl)
+library(forecast)
+library(ggplot2)
+CPI_Dataset_No_Description <- read_excel("/Users/kiannazem/Downloads/CPI - Dataset No Description.xlsx")
+```
+```{r}
+head(CPI_Dataset_No_Description)
+```
+```{r}
+library(tidyr)
+inflation_long <- CPI_Dataset_No_Description %>%
+  pivot_longer(cols = Jan:Dec, names_to = "Month", values_to = "CPI")
+```
+
+```{r}
+library(dplyr)
+
+inflation_long <- inflation_long %>%
+  mutate(Date = as.Date(paste(Year, match(Month, month.abb), "01", sep = "-")))
+```
+```{r}
+inflation_long <- inflation_long %>% arrange(Date)
+head(inflation_long)
+```
+```{r}
+inflation_ts <- ts(inflation_long$CPI, start = c(min(inflation_long$Year), 1), frequency = 12)
+```
+
+```{r}
+str(inflation_ts)
+```
+```{r}
+decomp_additive <- decompose(inflation_ts, type = "additive")
+plot(decomp_additive)
+```
+```{r}
+inflation_long <- na.omit(inflation_long)
+```
+```{r}
+inflation_long$CPI[is.na(inflation_long$CPI)] <- mean(inflation_long$CPI, na.rm = TRUE)
+```
+
+
+```{r}
+library(zoo)	
+inflation_long$CPI <- zoo::na.approx(inflation_long$CPI)
+
+```
+```{r}
+inflation_ts <- ts(inflation_long$CPI, start = c(min(inflation_long$Year), 1), frequency = 12)
+
+str(inflation_ts)
+```
+
+```{r}
+stl_decomp <- stl(inflation_ts, s.window = "periodic")
+```
+```{r}
+plot(stl_decomp)
+```
+
