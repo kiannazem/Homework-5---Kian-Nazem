@@ -1,0 +1,1 @@
+Included is the RMD file and HTML file from my RStudio code where I performed decomposition. In addition, I've included a word document that summarizes what I've found as a result of decomposition of my dataset.
